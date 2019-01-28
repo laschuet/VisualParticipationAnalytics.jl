@@ -1,0 +1,26 @@
+language: julia
+
+os:
+  - linux
+  - osx
+
+julia:
+  - 1.0
+  - 1.1
+  - nightly
+
+matrix:
+  allow_failures:
+  - julia: nightly
+
+branches:
+  only:
+    - master
+    - /release-.*/
+
+notifications:
+  email: false
+
+codecov: true
+
+coveralls: true
