@@ -1,6 +1,6 @@
 name = "ParticipationAnalytics"
 uuid = "3bc74930-dab7-11e8-2241-453bb1e3974f"
-authors = ["Lars Schütz]
+authors = ["Lars Schütz"]
 version = "0.1.0"
 
 [deps]
