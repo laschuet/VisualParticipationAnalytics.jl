@@ -1,5 +1,6 @@
 name = "ParticipationAnalytics"
 uuid = "3bc74930-dab7-11e8-2241-453bb1e3974f"
+authors = ["Lars Schütz]
 
 [deps]
 Clustering = "aaaa29a8-35af-508c-8bc3-b662a17a0fe5"
