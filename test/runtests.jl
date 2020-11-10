@@ -75,8 +75,8 @@ end
     doc2 = StringDocument("b")
     crps = Corpus([doc1, doc2])
     topicword, topicdoc = topicmodel(crps, 2, 100, 0.1, 0.1)
-    @test typeof(topicword) == SparseMatrixCSC{Float64, Int64}
-    @test typeof(topicdoc) == Array{Float64, 2}
+    @test typeof(topicword) == SparseMatrixCSC{Float64,Int64}
+    @test typeof(topicdoc) == Array{Float64,2}
 end
 
 @testset "topkwords" begin
@@ -86,7 +86,7 @@ end
     crps = Corpus([doc1, doc2, doc3])
     topicword, topicdoc = topicmodel(crps, 2, 100, 0.1, 0.1)
     words = topkwords(topicword, 1, crps, 2)
-    @test typeof(words) == Array{Tuple{String, Float64}, 1}
+    @test typeof(words) == Array{Tuple{String,Float64},1}
     @test length(words) == 2
     @test words[1][2] >= words[2][2]
 end
