@@ -93,7 +93,7 @@ end
 """"""
 function similarities(crps::Corpus, tfidf=true)
     dt = docterm(crps, tfidf)
-    return sparse(1 .- pairwise(CosineDist(), Matrix(dt')))
+    return sparse(1 .- pairwise(CosineDist(), Matrix(dt'), dims=2))
 end
 
 """"""
