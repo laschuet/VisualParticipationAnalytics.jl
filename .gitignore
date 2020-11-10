@@ -1,7 +1,11 @@
-docs/build
-.vscode
 *.jl.cov
 *.jl.*.cov
 *.jl.mem
-*.log
-*.swp
+deps/deps.jl
+deps/build.log
+deps/downloads/
+deps/usr/
+deps/src/
+docs/build/
+docs/site/
+Manifest.toml
