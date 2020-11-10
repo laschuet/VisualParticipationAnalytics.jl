@@ -84,9 +84,6 @@ function docterm(crps::Corpus, tfidf::Bool)
     if tfidf
         m = tf_idf(m)
     end
-    if typeof(m) == SparseMatrixCSC{Int,Int}
-        m = convert(SparseMatrixCSC{Float64,Int}, m)
-    end
     return m
 end
 
