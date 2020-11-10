@@ -31,16 +31,19 @@ using TextAnalysis
 end
 
 @testset "preprocessing" begin
-    entity = StringDocument("1Julia.is,2fun")
-    preprocess!(entity)
-    @test text(entity) == "Julia is fun"
+    rawtxt = " 1Julia .is,2 fun"
+    preprocessedtxt = "Julia is fun"
 
-    entity = StringDocument("1Julia.is,2fun")
+    entity = StringDocument(rawtxt)
+    preprocess!(entity)
+    @test text(entity) == preprocessedtxt
+
+    entity = StringDocument(rawtxt)
     crps = Corpus([entity])
     preprocess!(crps)
-    @test text(crps[1]) == "Julia is fun"
+    @test text(crps[1]) == preprocessedtxt
 
-    @test preprocess("1Julia.is,2fun") == "Julia is fun"
+    @test preprocess(rawtxt) == preprocessedtxt
 end
 
 @testset "similarities" begin
