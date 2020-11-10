@@ -31,8 +31,8 @@ using TextAnalysis
 end
 
 @testset "preprocessing" begin
-    rawtxt = " 1Julia .is,2 fun"
-    preprocessedtxt = "Julia is fun"
+    rawtxt = " The 1Julia programming language .is,2 fun"
+    preprocessedtxt = "The Julia program languag is fun"
 
     entity = StringDocument(rawtxt)
     preprocess!(entity)
