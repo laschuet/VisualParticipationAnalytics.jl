@@ -78,7 +78,7 @@ end
     doc2 = StringDocument("b")
     crps = Corpus([doc1, doc2])
     topicword, topicdoc = topicmodel(crps, 2, 100, 0.1, 0.1)
-    @test typeof(topicword) == SparseMatrixCSC{Float64,Int64}
+    @test typeof(topicword) == SparseMatrixCSC{Float64,Int}
     @test typeof(topicdoc) == Array{Float64,2}
 end
 
