@@ -44,9 +44,28 @@ end
 
 """"""
 function preprocess!(entity::Union{AbstractDocument,Corpus})
-    prepare!(entity, strip_corrupt_utf8)
-    prepare!(entity, strip_whitespace)
-    prepare!(entity, strip_non_letters)
+    prepare!(entity, strip_articles
+        # | strip_case
+        | strip_corrupt_utf8
+        #
+        # | strip_articles
+        # | strip_indefinite_articles
+        # | strip_definite_articles
+        #
+        # | strip_preposition
+        # | strip_pronouns
+        #
+        | strip_non_letters
+        # | strip_numbers
+        # | strip_punctuation
+        | strip_whitespace
+        #
+        # | strip_frequent_terms
+        # | strip_spares_terms
+        # | strip_stopwords
+        #
+        # | strip_html_tags
+    )
 end
 
 """"""
