@@ -44,9 +44,9 @@ end
 
 """"""
 function preprocess!(entity::Union{AbstractDocument,Corpus})
-    prepare!(entity, strip_articles
+    prepare!(entity,
+        strip_corrupt_utf8
         # | strip_case
-        | strip_corrupt_utf8
         #
         # | strip_articles
         # | strip_indefinite_articles
@@ -66,6 +66,7 @@ function preprocess!(entity::Union{AbstractDocument,Corpus})
         #
         # | strip_html_tags
     )
+    stem!(entity)
 end
 
 """"""
