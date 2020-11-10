@@ -30,7 +30,7 @@ using TextAnalysis
     @test slatetext(str) == "Julia is fun"
 end
 
-@testset "preprocessing" begin
+@testset "preprocess" begin
     rawtxt = " The 1Julia programming language .is,2 fun"
     preprocessedtxt = "The Julia program languag is fun"
 
