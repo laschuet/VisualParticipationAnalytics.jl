@@ -94,21 +94,21 @@ function similarities(crps::Corpus, tfidf=true)
 end
 
 """"""
-function clustering(crps::Corpus, k::Int64, tfidf=true)
+function clustering(crps::Corpus, k::Int, tfidf=true)
     dt = docterm(crps, tfidf)
     return kmeans(Matrix(dt'), k; init=:kmpp)
 end
 
 """"""
-function topicmodel(crps::Corpus, k::Int64, iter::Int64, alpha::Float64,
+function topicmodel(crps::Corpus, k::Int, iter::Int, alpha::Float64,
                 beta::Float64)
     update_lexicon!(crps)
     return lda(DocumentTermMatrix(crps), k, iter, alpha, beta)
 end
 
 """"""
-function topkwords(topicword::SparseMatrixCSC{Float64,Int64}, i::Int64,
-                    crps::Corpus, k::Int64=10)
+function topkwords(topicword::SparseMatrixCSC{Float64,Int}, i::Int,
+                    crps::Corpus, k::Int=10)
     terms = collect(keys(lexicon(crps)))
     topicword = permutedims(topicword)
     rows = rowvals(topicword)
