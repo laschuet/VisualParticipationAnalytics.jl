@@ -45,6 +45,7 @@ end
         @test text(crps[1]) == output
 
         @test preprocess(input) == output
+        @test preprocess(input, lang) == output
     end
 
     @testset "english" begin

@@ -44,6 +44,18 @@ function slatetext(content::AbstractString)
 end
 
 """"""
+preprocess(txt::AbstractString) = _preprocess(txt, LanguageDetector()(txt)[1])
+preprocess(txt::AbstractString, lang::Language) = _preprocess(txt, lang)
+
+# Core implementation of pre-processing a string
+function _preprocess(txt::AbstractString, lang::Language)
+    doc = StringDocument(txt)
+    language!(doc, lang)
+    preprocess!(doc)
+    return text(doc)
+end
+
+""""""
 function preprocess!(entity::Union{AbstractDocument,Corpus})
     #=
         (November 11th, 2020)
@@ -67,15 +79,6 @@ function preprocess!(entity::Union{AbstractDocument,Corpus})
     remove_patterns!(entity, r"[^a-zA-ZäöüÄÖÜß\s]")
     prepare!(entity, strip_whitespace)
     stem!(entity)
-end
-
-""""""
-function preprocess(txt::AbstractString)
-    doc = StringDocument(txt)
-    detector = LanguageDetector()
-    language!(doc, detector(txt)[1])
-    preprocess!(doc)
-    return text(doc)
 end
 
 """"""
