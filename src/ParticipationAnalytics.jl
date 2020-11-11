@@ -44,28 +44,27 @@ end
 
 """"""
 function preprocess!(entity::Union{AbstractDocument,Corpus})
-    prepare!(entity,
-        strip_corrupt_utf8
-        # | strip_case
-        #
-        # | strip_articles
-        # | strip_indefinite_articles
-        # | strip_definite_articles
-        #
-        # | strip_preposition
-        # | strip_pronouns
-        #
-        | strip_non_letters
-        # | strip_numbers
-        # | strip_punctuation
-        | strip_whitespace
-        #
-        # | strip_frequent_terms
-        # | strip_spares_terms
-        # | strip_stopwords
-        #
-        # | strip_html_tags
-    )
+    #=
+        (November 11th, 2020)
+        The following flags for `prepare!` are available:
+        - strip_corrupt_utf8
+        - strip_case
+        - strip_articles
+        - strip_indefinite_articles
+        - strip_definite_articles
+        - strip_preposition
+        - strip_pronouns
+        - strip_non_letters
+        - strip_numbers
+        - strip_punctuation
+        - strip_whitespace
+        - strip_frequent_terms
+        - strip_sparse_terms
+        - strip_stopwords
+    =#
+    prepare!(entity, strip_corrupt_utf8)
+    remove_patterns!(entity, r"[^a-zA-ZäöüÄÖÜß\s]")
+    prepare!(entity, strip_whitespace)
     stem!(entity)
 end
 
