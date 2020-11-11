@@ -44,11 +44,8 @@ function slatetext(content::AbstractString)
 end
 
 """"""
-preprocess(txt::AbstractString) = _preprocess(txt, LanguageDetector()(txt)[1])
-preprocess(txt::AbstractString, lang::Language) = _preprocess(txt, lang)
-
-# Core implementation of pre-processing a string
-function _preprocess(txt::AbstractString, lang::Language)
+preprocess(txt::AbstractString) = preprocess(txt, LanguageDetector()(txt)[1])
+function preprocess(txt::AbstractString, lang::Language)
     doc = StringDocument(txt)
     language!(doc, lang)
     preprocess!(doc)
