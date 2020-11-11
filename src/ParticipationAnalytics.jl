@@ -5,9 +5,12 @@ using Distances
 using JSON
 using Languages
 using SparseArrays
+using SQLite
+using Tables
 using TextAnalysis
 
 export clustering,
+        corpus,
         preprocess,
         preprocess!,
         similarities,
@@ -41,6 +44,16 @@ end
 function slatetext(content::AbstractString)
     json = JSON.parse(content)
     return slatetext(json)
+end
+
+""""""
+function corpus(db::SQLite.DB, tablename::AbstractString,
+                colname::AbstractString)
+    table = DBInterface.execute(db, """
+        SELECT $colname FROM $tablename;
+    """) |> Tables.columntable
+    rows = table[Symbol(colname)]
+    return Corpus(StringDocument.(rows))
 end
 
 """"""
