@@ -3,6 +3,7 @@ module ParticipationAnalytics
 using Clustering
 using Distances
 using JSON
+using Languages
 using SparseArrays
 using TextAnalysis
 
@@ -71,6 +72,8 @@ end
 """"""
 function preprocess(txt::AbstractString)
     doc = StringDocument(txt)
+    detector = LanguageDetector()
+    language!(doc, detector(txt)[1])
     preprocess!(doc)
     return text(doc)
 end
