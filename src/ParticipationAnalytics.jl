@@ -18,60 +18,8 @@ export clustering,
         topicmodel,
         topkwords
 
-""""""
-function slatetext(nodes::AbstractArray)
-    text = ""
-    for node in nodes
-        if node["kind"] == "text"
-            leaves = get(node, "leaves", [])
-            text *= mapreduce(leaf -> get(leaf, "text", ""), *, leaves; init="")
-            text *= " "
-        else
-            text *= slatetext(get(node, "nodes", []))
-        end
-    end
-    return strip(text)
-end
-
-""""""
-function slatetext(state::Dict)
-    document = get(state, "document", Dict())
-    nodes = get(document, "nodes", [])
-    return slatetext(nodes)
-end
-
-""""""
-function slatetext(content::AbstractString)
-    json = JSON.parse(content)
-    return slatetext(json)
-end
-
-""""""
-function corpus(db::SQLite.DB, tablename::AbstractString,
-                colname::AbstractString)
-    table = DBInterface.execute(db, """
-        SELECT $colname FROM $tablename;
-    """) |> Tables.columntable
-    rows = table[Symbol(colname)]
-    return Corpus(StringDocument.(rows))
-end
-
-""""""
-preprocess(txt::AbstractString) = preprocess(txt, LanguageDetector()(txt)[1])
-function preprocess(txt::AbstractString, lang::Language)
-    doc = StringDocument(txt)
-    language!(doc, lang)
-    preprocess!(doc)
-    return text(doc)
-end
-
-""""""
-function preprocess!(entity::Union{AbstractDocument,Corpus})
-    prepare!(entity, strip_corrupt_utf8)
-    remove_patterns!(entity, r"[^a-zA-ZäöüÄÖÜß\s]")
-    prepare!(entity, strip_whitespace)
-    stem!(entity)
-end
+include("io.jl")
+include("preprocessing.jl")
 
 """"""
 function docterm(crps::Corpus, tfidf::Bool)
