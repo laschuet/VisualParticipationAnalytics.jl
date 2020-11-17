@@ -1,12 +1,12 @@
 using Documenter
-using ParticipationAnalytics
+using VisualParticipationAnalytics
 
 makedocs(
-    modules = [ParticipationAnalytics],
-    sitename = "ParticipationAnalytics.jl",
+    modules = [VisualParticipationAnalytics],
+    sitename = "VisualParticipationAnalytics.jl",
     pages = [
         "Home" => "index.md",
     ],
 )
 
-deploydocs(repo = "github.com/laschuet/ParticipationAnalytics.jl.git")
+deploydocs(repo = "github.com/laschuet/VisualParticipationAnalytics.jl.git")

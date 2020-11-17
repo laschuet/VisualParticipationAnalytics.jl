@@ -1,4 +1,4 @@
-using ParticipationAnalytics
+using VisualParticipationAnalytics
 using Clustering
 using Languages
 using SparseArrays
@@ -7,7 +7,7 @@ using Tables
 using Test
 using TextAnalysis
 
-@testset "ParticipationAnalytics" begin
+@testset "VisualParticipationAnalytics" begin
     include("io.jl")
     include("preprocessing.jl")
 

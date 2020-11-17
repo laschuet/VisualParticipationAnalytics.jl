@@ -1,4 +1,4 @@
-module ParticipationAnalytics
+module VisualParticipationAnalytics
 
 using Clustering
 using Distances
@@ -67,4 +67,4 @@ function topkwords(topicword::SparseMatrixCSC{Float64,Int}, i::Int,
     return wordprobs[1:n]
 end
 
-end # module ParticipationAnalytics
+end # module VisualParticipationAnalytics

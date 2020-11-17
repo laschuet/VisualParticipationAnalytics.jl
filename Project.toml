@@ -1,5 +1,5 @@
-name = "ParticipationAnalytics"
-uuid = "3bc74930-dab7-11e8-2241-453bb1e3974f"
+name = "VisualParticipationAnalytics"
+uuid = "bbd64049-1bd8-4ca4-b285-6ccec4c8be5f"
 authors = ["Lars Schütz"]
 version = "0.1.0"
 

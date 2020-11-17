@@ -1,1 +1,1 @@
-# ParticipationAnalytics.jl
+# VisualParticipationAnalytics.jl
