@@ -101,7 +101,7 @@ function clusterdbscan(data, dist)
 
         ## Assignment plots
         plt = assignmentplot(assignments(clusterings[1]), data[:, 1], data[:, 2], "longitude", "latitude")
-        pgfsave(CONFIG["out_dir"] * "/dbscan_assignments_eps_" * string(floor(eps, digits=4)) * "_min_pts_$minpts.pdf", plt)
+        pgfsave(CONFIG["out_dir"] * "/dbscan_assignments_eps_" * string(floor(eps, digits=3)) * "_min_pts_$minpts.pdf", plt)
     end
 end
 
