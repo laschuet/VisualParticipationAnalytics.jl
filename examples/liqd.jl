@@ -17,9 +17,6 @@ function initplots()
     empty!(PGFPlotsX.CUSTOM_PREAMBLE)
     push!(PGFPlotsX.CUSTOM_PREAMBLE, raw"""
         \usepgfplotslibrary{colorbrewer}
-        \usepackage{libertine}
-        \usepackage{unicode-math}
-        \setmathfont[Scale=MatchUppercase]{libertinusmath-regular.otf}
         \pgfplotsset{
             colormap/Paired-12,
             cycle list/Paired-12,
@@ -28,6 +25,9 @@ function initplots()
                 Paired-12\nextlist
             }
         }
+        \usepackage{libertine}
+        \usepackage{unicode-math}
+        \setmathfont[Scale=MatchUppercase]{libertinusmath-regular.otf}
     """)
 end
 
