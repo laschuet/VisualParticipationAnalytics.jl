@@ -28,17 +28,34 @@ push!(PGFPlotsX.CUSTOM_PREAMBLE, raw"""
 """)
 
 function assignmentplot(assignments, x, y, xlabel, ylabel)
-    return @pgf Axis({
-        xlabel = xlabel,
-        ylabel = ylabel,
-    }, Plot({
-        scatter,
-        "only marks",
-        scatter_src = "explicit",
-        mark_size = "1pt"
-    }, Table({
-        meta = "cluster"
-    }, x=x, y=y, cluster=assignments)))
+    t = Table({ meta = "cluster" }, x=x, y=y, cluster=assignments)
+    p = Plot({ scatter, "only marks", scatter_src = "explicit", mark_size = "1pt" }, t)
+    return @pgf Axis({ xlabel = xlabel, ylabel = ylabel }, p)
+end
+
+function assignmentplot(assignments, x, y, xlabel, ylabel)
+    return @pgf Axis(
+        {
+            xlabel = xlabel,
+            ylabel = ylabel,
+        },
+        Plot(
+            {
+                scatter,
+                "only marks",
+                scatter_src = "explicit",
+                mark_size = "1pt"
+            },
+            Table(
+                {
+                    meta = "cluster",
+                },
+                x=x,
+                y=y,
+                cluster=assignments
+            )
+        )
+    )
 end
 
 function main(dbpath, tablename)
@@ -61,7 +78,7 @@ function main(dbpath, tablename)
     longitude = table[Symbol("long")]
     latitude = table[Symbol("lat")]
     data = [longitude latitude]
-    #display(data)
+    # display(data)
 
     # k-means
     k_range = 2:2
