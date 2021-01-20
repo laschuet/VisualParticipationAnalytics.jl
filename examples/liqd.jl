@@ -1,6 +1,7 @@
 using VisualParticipationAnalytics
 using Clustering
 using Distances
+using LinearAlgebra
 using NearestNeighbors
 using PGFPlotsX
 using Random
@@ -68,27 +69,39 @@ function clusterkmeans(data, ks, dist)
 end
 
 function clusterdbscan(data, dist)
-    minpts = 5
+    for minpts = 2:12
+        tree = BallTree(data', dist)
+        _, knn_distances = knn(tree, data', minpts + 1, true)
+        mean_knn_distances = mean.(knn_distances)
+        sort!(mean_knn_distances)
 
-    tree = BallTree(data', dist)
-    _, knn_distances = knn(tree, data', minpts + 1, true)
-    avg_knn_distances = mean.(knn_distances)
-    sort!(avg_knn_distances)
+        n = length(mean_knn_distances)
+        ds = []
+        first_to_last = [n, mean_knn_distances[n]] - [1, mean_knn_distances[1]]
+        normalize!(first_to_last)
+        for i = 1:n
+            first_to_i = [i, mean_knn_distances[i]] - [1, mean_knn_distances[1]]
+            d = norm(first_to_i - dot(first_to_i, first_to_last) * first_to_last)
+            push!(ds, d)
+        end
+        eps = mean_knn_distances[argmax(ds)]
 
-    c = @pgf Coordinates(zip(1:length(avg_knn_distances), avg_knn_distances))
-    p = @pgf Plot({ color = "red" }, c)
-    plt = @pgf Axis({ xlabel = "instance", ylabel = "$minpts-nn distance" }, p)
-    pgfsave(CONFIG["out_dir"] * "/dbscan_eps.pdf", plt)
+        c = @pgf Coordinates(zip(1:n, mean_knn_distances))
+        p = @pgf Plot({ color = "red" }, c)
+        plt = @pgf Axis({ xlabel = "instance", ylabel = "$minpts-nn distance" }, p,
+                HLine({ dotted }, eps))
+        pgfsave(CONFIG["out_dir"] * "/dbscan_eps_min_pts_$minpts.pdf", plt)
 
-    clusterings = []
+        clusterings = []
 
-    distances = pairwise(dist, data')
-    clustering = dbscan(distances, 0.7, minpts)
-    push!(clusterings, clustering)
+        distances = pairwise(dist, data')
+        clustering = dbscan(distances, eps, minpts)
+        push!(clusterings, clustering)
 
-    ## Assignment plots
-    plt = assignmentplot(assignments(clusterings[1]), data[:, 1], data[:, 2], "longitude", "latitude")
-    pgfsave(CONFIG["out_dir"] * "/dbscan_assignments_eps_0.7_min_pts_$minpts.pdf", plt)
+        ## Assignment plots
+        plt = assignmentplot(assignments(clusterings[1]), data[:, 1], data[:, 2], "longitude", "latitude")
+        pgfsave(CONFIG["out_dir"] * "/dbscan_assignments_eps_" * string(floor(eps, digits=4)) * "_min_pts_$minpts.pdf", plt)
+    end
 end
 
 function main(dbpath, tablename)
@@ -116,4 +129,5 @@ function main(dbpath, tablename)
     clusterdbscan(data, earth_haversine)
 end
 
+initplots()
 main("~/datasets/participation/liqd_laermorte_melden.sqlite", "contribution")
