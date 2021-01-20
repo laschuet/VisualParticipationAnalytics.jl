@@ -56,7 +56,7 @@ function clusterkmeans(data, ks, dist)
 
     ## Elbow method plot
     c = @pgf Coordinates(zip(ks, Js))
-    p = @pgf Plot({ color = "blue", mark = "x" }, c)
+    p = @pgf Plot({ color = "red", mark = "x" }, c)
     plt = @pgf Axis({ xlabel = raw"\(k\)", ylabel = raw"\(J\)" }, p)
     pgfsave(CONFIG["out_dir"] * "/kmeans_elbow.pdf", plt)
 
@@ -76,7 +76,7 @@ function clusterdbscan(data, dist)
     sort!(avg_knn_distances)
 
     c = @pgf Coordinates(zip(1:length(avg_knn_distances), avg_knn_distances))
-    p = @pgf Plot({ color = "green" }, c)
+    p = @pgf Plot({ color = "red" }, c)
     plt = @pgf Axis({ xlabel = "instance", ylabel = "$minpts-nn distance" }, p)
     pgfsave(CONFIG["out_dir"] * "/dbscan_eps.pdf", plt)
 
