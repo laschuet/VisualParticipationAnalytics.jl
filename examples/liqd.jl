@@ -70,7 +70,7 @@ function clusterkmeans(data, ks, dist)
 end
 
 function clusterdbscan(data, dist)
-    for minpts = 2:12
+    for minpts = 2:24
         tree = BallTree(data', dist)
         _, knn_distances = knn(tree, data', minpts + 1, true)
         mean_knn_distances = mean.(knn_distances)
