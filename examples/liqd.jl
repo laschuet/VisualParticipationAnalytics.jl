@@ -67,6 +67,30 @@ function clusterkmeans(data, ks, dist)
     pgfsave(CONFIG["out_dir"] * "/kmeans_silhouette.pdf", plt)
 end
 
+function clusterdbscan(data, dist)
+    minpts = 5
+
+    tree = BallTree(data', dist)
+    _, knn_distances = knn(tree, data', minpts + 1, true)
+    avg_knn_distances = mean.(knn_distances)
+    sort!(avg_knn_distances)
+
+    c = @pgf Coordinates(zip(1:length(avg_knn_distances), avg_knn_distances))
+    p = @pgf Plot({ color = "green" }, c)
+    plt = @pgf Axis({ xlabel = "instance", ylabel = "$minpts-nn distance" }, p)
+    pgfsave(CONFIG["out_dir"] * "/dbscan_eps.pdf", plt)
+
+    clusterings = []
+
+    distances = pairwise(dist, data')
+    clustering = dbscan(distances, 0.7, minpts)
+    push!(clusterings, clustering)
+
+    ## Assignment plots
+    plt = assignmentplot(assignments(clusterings[1]), data[:, 1], data[:, 2], "longitude", "latitude")
+    pgfsave(CONFIG["out_dir"] * "/dbscan_assignments_eps_0.7_min_pts_$minpts.pdf", plt)
+end
+
 function main(dbpath, tablename)
     MEAN_EARTH_RADIUS = 6371
     earth_haversine = Haversine(MEAN_EARTH_RADIUS)
@@ -88,32 +112,8 @@ function main(dbpath, tablename)
     data = [longitude latitude]
     # display(data)
 
-    # k-means
     clusterkmeans(data, 2:12, earth_haversine)
-
-    # DBSCAN
-    distances = pairwise(earth_haversine, data')
-    tree = BallTree(data', earth_haversine)
-    k = 5
-    _, knn_distances = knn(tree, data', k + 1, true)
-    avg_knn_distances = mean.(knn_distances)
-    sort!(avg_knn_distances)
-    plt = @pgf Axis({
-        xlabel = "instance",
-        ylabel = "$k-nn distance",
-    }, Plot({
-        color = "green"
-    }, Coordinates(zip(1:length(avg_knn_distances), avg_knn_distances))))
-    pgfsave(CONFIG["out_dir"] * "/dbscan_eps.pdf", plt)
-
-    clusterings = []
-    clustering = dbscan(distances, 0.7, k)
-    push!(clusterings, clustering)
-
-    # Evaluate DBSCAN
-    ## Assignment plots
-    plt = assignmentplot(assignments(clusterings[1]), longitude, latitude, "longitude", "latitude")
-    pgfsave(CONFIG["out_dir"] * "/dbscan_assignments_eps_0.7_min_pts_5.pdf", plt)
+    clusterdbscan(data, earth_haversine)
 end
 
 main("~/datasets/participation/liqd_laermorte_melden.sqlite", "contribution")
