@@ -27,6 +27,20 @@ push!(PGFPlotsX.CUSTOM_PREAMBLE, raw"""
 }
 """)
 
+function assignmentplot(assignments, x, y, xlabel, ylabel)
+    return @pgf Axis({
+        xlabel = xlabel,
+        ylabel = ylabel,
+    }, Plot({
+        scatter,
+        "only marks",
+        scatter_src = "explicit",
+        mark_size = "1pt"
+    }, Table({
+        meta = "cluster"
+    }, x=x, y=y, cluster=assignments)))
+end
+
 function main(dbpath, tablename)
     MEAN_EARTH_RADIUS = 6371
     earth_haversine = Haversine(MEAN_EARTH_RADIUS)
@@ -68,17 +82,7 @@ function main(dbpath, tablename)
     # Evaluate k-means
     ## Assignment plots
     for k in k_range
-        plt = @pgf Axis({
-            xlabel = "longitude",
-            ylabel = "latitude",
-        }, PlotInc({
-            scatter,
-            "only marks",
-            scatter_src = "explicit",
-            mark_size = "1pt"
-        }, Table({
-            meta = "cluster"
-        }, x = longitude, y = latitude, cluster = assignments(clusterings[k - 1]))))
+        plt = assignmentplot(assignments(clusterings[k - 1]), longitude, latitude, "longitude", "latitude")
         pgfsave("$OUT_PATH/kmeans_assignments_k_" * (k < 10 ? "0$k" : "$k") * ".pdf", plt)
     end
     ## Elbow method
@@ -121,17 +125,7 @@ function main(dbpath, tablename)
 
     # Evaluate DBSCAN
     ## Assignment plots
-    plt = @pgf Axis({
-        xlabel = "longitude",
-        ylabel = "latitude",
-    }, Plot({
-        scatter,
-        "only marks",
-        scatter_src = "explicit",
-        mark_size = "1pt"
-    }, Table({
-        meta = "cluster"
-    }, x = longitude, y = latitude, cluster = assignments(clusterings[1]))))
+    plt = assignmentplot(assignments(clusterings[1]), longitude, latitude, "longitude", "latitude")
     pgfsave("$OUT_PATH/dbscan_assignments_eps_0.7_min_pts_5.pdf", plt)
 end
 
