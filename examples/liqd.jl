@@ -33,31 +33,6 @@ function assignmentplot(assignments, x, y, xlabel, ylabel)
     return @pgf Axis({ xlabel = xlabel, ylabel = ylabel }, p)
 end
 
-function assignmentplot(assignments, x, y, xlabel, ylabel)
-    return @pgf Axis(
-        {
-            xlabel = xlabel,
-            ylabel = ylabel,
-        },
-        Plot(
-            {
-                scatter,
-                "only marks",
-                scatter_src = "explicit",
-                mark_size = "1pt"
-            },
-            Table(
-                {
-                    meta = "cluster",
-                },
-                x=x,
-                y=y,
-                cluster=assignments
-            )
-        )
-    )
-end
-
 function main(dbpath, tablename)
     MEAN_EARTH_RADIUS = 6371
     earth_haversine = Haversine(MEAN_EARTH_RADIUS)
