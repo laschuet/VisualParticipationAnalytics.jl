@@ -28,8 +28,8 @@ push!(PGFPlotsX.CUSTOM_PREAMBLE, raw"""
 """)
 
 function assignmentplot(assignments, x, y, xlabel, ylabel)
-    t = Table({ meta = "cluster" }, x=x, y=y, cluster=assignments)
-    p = Plot({ scatter, "only marks", scatter_src = "explicit", mark_size = "1pt" }, t)
+    t = @pgf Table({ meta = "cluster" }, x=x, y=y, cluster=assignments)
+    p = @pgf Plot({ scatter, "only marks", scatter_src = "explicit", mark_size = "1pt" }, t)
     return @pgf Axis({ xlabel = xlabel, ylabel = ylabel }, p)
 end
 
