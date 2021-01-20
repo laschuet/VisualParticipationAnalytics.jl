@@ -11,24 +11,25 @@ using Tables
 
 Random.seed!(1)
 
-empty!(PGFPlotsX.CUSTOM_PREAMBLE)
-push!(PGFPlotsX.CUSTOM_PREAMBLE, raw"""
-\usepgfplotslibrary{colorbrewer}
-%\usepgfplotslibrary{colormap}
-\usepackage{libertine}
-\usepackage{unicode-math}
-\setmathfont[Scale=MatchUppercase]{libertinusmath-regular.otf}
-\pgfplotsset{
-    colormap/Paired-12,
-    cycle list/Paired-12,
-    cycle multiindex* list={
-        mark list*\nextlist
-        Paired-12\nextlist
-    }
-}
-""")
-
 const CONFIG = Dict("out_dir" => "out")
+
+function initplots()
+    empty!(PGFPlotsX.CUSTOM_PREAMBLE)
+    push!(PGFPlotsX.CUSTOM_PREAMBLE, raw"""
+        \usepgfplotslibrary{colorbrewer}
+        \usepackage{libertine}
+        \usepackage{unicode-math}
+        \setmathfont[Scale=MatchUppercase]{libertinusmath-regular.otf}
+        \pgfplotsset{
+            colormap/Paired-12,
+            cycle list/Paired-12,
+            cycle multiindex* list={
+                mark list*\nextlist
+                Paired-12\nextlist
+            }
+        }
+    """)
+end
 
 function assignmentplot(assignments, x, y, xlabel, ylabel)
     t = @pgf Table({ meta = "cluster" }, x=x, y=y, cluster=assignments)
