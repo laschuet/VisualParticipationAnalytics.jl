@@ -91,7 +91,7 @@ function clusterdbscan(data, dist)
         p = @pgf Plot({ color = "red" }, c)
         plt = @pgf Axis({ xlabel = "instance", ylabel = "$minpts-nn distance" }, p,
                 HLine({ dotted }, eps))
-        pgfsave(CONFIG["out_dir"] * "/dbscan_eps_min_pts_$minpts.pdf", plt)
+        pgfsave(CONFIG["out_dir"] * "/dbscan_eps_min_pts_" * (minpts < 10 ? "0" : "") * "$minpts.pdf", plt)
 
         clusterings = []
 
@@ -101,7 +101,8 @@ function clusterdbscan(data, dist)
 
         ## Assignment plots
         plt = assignmentplot(assignments(clusterings[1]), data[:, 1], data[:, 2], "longitude", "latitude")
-        pgfsave(CONFIG["out_dir"] * "/dbscan_assignments_eps_" * string(floor(eps, digits=3)) * "_min_pts_$minpts.pdf", plt)
+        pgfsave(CONFIG["out_dir"] * "/dbscan_assignments_eps_" * string(floor(eps, digits=3))
+                * "_min_pts_" * (minpts < 10 ? "0" : "") * "$minpts.pdf", plt)
     end
 end
 
