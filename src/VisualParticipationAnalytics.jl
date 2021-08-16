@@ -12,7 +12,6 @@ using TextAnalysis
 export clustering,
         corpus,
         preprocess,
-        preprocess!,
         similarities,
         slatetext,
         topicmodel,
