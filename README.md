@@ -6,6 +6,12 @@
 
 Utility functions for Visual Participation Analytics (ViPA).
 
+## Installation
+
+```julia
+]add https://github.com/laschuet/VisualParticipationAnalytics.jl
+```
+
 ## License
 
 VisualParticipationAnalytics.jl is licensed under the [MIT License](./LICENSE.txt).
