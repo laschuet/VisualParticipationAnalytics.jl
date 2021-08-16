@@ -1,18 +1,25 @@
 using VisualParticipationAnalytics
 using Clustering
+using DataFrames
 using Distances
+using Languages
 using LinearAlgebra
+using MLJ
+using MultivariateStats
 using NearestNeighbors
 using PGFPlotsX
 using Random
 using SQLite
 using Statistics
-using Tables
+using StatsBase
+using TextAnalysis
 
 Random.seed!(1)
 
-const CONFIG = Dict("out_dir" => "out")
+CONFIG = Dict(:out_dir=>"out", :do_lsa=>false, :do_lda=>true, :do_cluster=>false)
 
+"""
+"""
 function initplots()
     empty!(PGFPlotsX.CUSTOM_PREAMBLE)
     push!(PGFPlotsX.CUSTOM_PREAMBLE, raw"""
@@ -28,16 +35,89 @@ function initplots()
         \usepackage{libertine}
         \usepackage{unicode-math}
         \setmathfont[Scale=MatchUppercase]{libertinusmath-regular.otf}
+        \newcommand{\mlv}[1]{\mathit{#1}}
     """)
 end
 
-function assignmentplot(assignments, x, y, xlabel, ylabel)
-    t = @pgf Table({ meta = "cluster" }, x=x, y=y, cluster=assignments)
-    p = @pgf Plot({ scatter, "only marks", scatter_src = "explicit", mark_size = "1pt" }, t)
-    return @pgf Axis({ xlabel = xlabel, ylabel = ylabel }, p)
+"""
+"""
+function creategraph(dbpath, tablename)
+    # Load data
+    db = SQLite.DB(dbpath)
+    df = DBInterface.execute(db, """
+        SELECT * FROM $tablename;
+    """) |> DataFrame
+
+    for i = 1:5
+        println(df[i])
+    end
 end
 
-function clusterkmeans(data, ks, dist)
+"""
+"""
+function preparedata(dbpath, tablename)
+    # Load data
+    db = SQLite.DB(dbpath)
+    df = DBInterface.execute(db, """
+        SELECT * FROM $tablename;
+    """) |> DataFrame
+    display(describe(df))
+
+    # Pre-process data
+    # Textual data
+    lang = Languages.German()
+    authors = df[:, ["author"]]
+    #categorical!(authors)
+    #ohe = OneHotEncoder()
+    #mach = MLJ.fit!(machine(ohe, authors))
+    #authors_ohe = MLJ.transform(mach, authors)
+    #df = [df authors_ohe]
+
+    titles = df[:, "title"]
+    titles = preprocess.(titles, [lang])
+    tfidf_titles = tf_idf(titles)
+    crps_titles = Corpus(StringDocument.(titles))
+    update_lexicon!(crps_titles)
+    dtm_titles = DocumentTermMatrix(crps_titles)
+
+    contents = df[:, "content"]
+    contents = preprocess.(contents, [lang])
+    tfidf_contents = tf_idf(contents)
+    crps_contents = Corpus(StringDocument.(contents))
+    update_lexicon!(crps_contents)
+    dtm_contents = DocumentTermMatrix(crps_contents)
+
+    # Temporal data
+    # created_at
+
+    # Other data
+    #
+    #category = df[:, ["category"]]
+    #categorical!(category)
+    #ohe = OneHotEncoder()
+    #mach = MLJ.fit!(machine(ohe, category))
+    #category_ohe = MLJ.transform(mach, category)
+    #df = [df category_ohe]
+
+    return df, crps_titles, crps_contents, dtm_titles, dtm_contents, tfidf_titles, tfidf_contents
+end
+
+"""
+"""
+function assignmentplot(assignments, x, y, xlabel, ylabel)
+    t = @pgf PGFPlotsX.Table({ meta="cluster" }, x=x, y=y, cluster=assignments)
+    p = @pgf Plot({
+        scatter,
+        "only marks",
+        scatter_src="explicit",
+        mark_size="1pt"
+    }, t)
+    return @pgf Axis({ xlabel=xlabel, ylabel=ylabel }, p)
+end
+
+"""
+"""
+function clusterkmeans(data, ks, dist, x, y, name)
     clusterings = []
     Js = []
     silhouette_coefficients = []
@@ -52,84 +132,117 @@ function clusterkmeans(data, ks, dist)
 
     ## Assignment plots
     for k in ks
-        plt = assignmentplot(assignments(clusterings[k - 1]), data[:, 1],data[:, 2], "longitude", "latitude")
-        pgfsave(CONFIG["out_dir"] * "/kmeans_assignments_k_" * (k < 10 ? "0$k" : "$k") * ".pdf", plt)
+        plt = assignmentplot(assignments(clusterings[k - 1]), x, y, "longitude",
+                "latitude")
+        pgfsave(CONFIG[:out_dir] * "/kmeans_$(name)_assignments_k_" * (k < 10 ? "0$k" : "$k") * ".pdf", plt)
     end
 
     ## Elbow method plot
     c = @pgf Coordinates(zip(ks, Js))
-    p = @pgf Plot({ color = "red", mark = "x" }, c)
-    plt = @pgf Axis({ xlabel = raw"\(k\)", ylabel = raw"\(J\)" }, p)
-    pgfsave(CONFIG["out_dir"] * "/kmeans_elbow.pdf", plt)
+    p = @pgf Plot({ color="red", mark="x" }, c)
+    plt = @pgf Axis({ xlabel=raw"\(k\)", ylabel=raw"\(J\)" }, p)
+    pgfsave(CONFIG[:out_dir] * "/kmeans_$(name)_elbow.pdf", plt)
 
     ## Silhouette coefficient plot
     c = @pgf Coordinates(zip(ks, silhouette_coefficients))
-    p = @pgf Plot({ color = "red", mark = "x" }, c)
-    plt = @pgf Axis({ xlabel = raw"\(k\)", ylabel = "silhouette coefficient" }, p)
-    pgfsave(CONFIG["out_dir"] * "/kmeans_silhouette.pdf", plt)
+    p = @pgf Plot({ color="red", mark="x" }, c)
+    plt = @pgf Axis({ xlabel=raw"\(k\)", ylabel="silhouette coefficient" }, p)
+    pgfsave(CONFIG[:out_dir] * "/kmeans_$(name)_silhouette.pdf", plt)
 end
 
-function clusterdbscan(data, dist)
-    for minpts = 2:24
-        tree = BallTree(data', dist)
-        _, knn_distances = knn(tree, data', minpts + 1, true)
-        mean_knn_distances = mean.(knn_distances)
-        sort!(mean_knn_distances)
+"""
+"""
+function clusterdbscan(data, minpoints, dist, optimize, x, y, name)
+    eps = 0.825
+    silhouette_coefficients = []
+    for minpts in minpoints
+        if optimize
+            tree = BallTree(data', dist)
+            _, knn_distances = knn(tree, data', minpts + 1, true)
+            mean_knn_distances = mean.(knn_distances)
+            sort!(mean_knn_distances)
 
-        n = length(mean_knn_distances)
-        ds = []
-        first_to_last = [n, mean_knn_distances[n]] - [1, mean_knn_distances[1]]
-        normalize!(first_to_last)
-        for i = 1:n
-            first_to_i = [i, mean_knn_distances[i]] - [1, mean_knn_distances[1]]
-            d = norm(first_to_i - dot(first_to_i, first_to_last) * first_to_last)
-            push!(ds, d)
+            n = length(mean_knn_distances)
+            ds = []
+            first_to_last = [n, mean_knn_distances[n]] - [1, mean_knn_distances[1]]
+            normalize!(first_to_last)
+            for i = 1:n
+                first_to_i = [i, mean_knn_distances[i]] - [1, mean_knn_distances[1]]
+                d = norm(first_to_i - dot(first_to_i, first_to_last) * first_to_last)
+                push!(ds, d)
+            end
+            eps = mean_knn_distances[argmax(ds)]
+
+            c = @pgf Coordinates(zip(1:n, mean_knn_distances))
+            p = @pgf Plot({ color="red" }, c)
+            plt = @pgf Axis({ xlabel="instance", ylabel="$minpts-nn distance" }, p,
+                    HLine({ dotted }, eps))
+            pgfsave(CONFIG[:out_dir] * "/dbscan_$(name)_eps_min_pts_" * (minpts < 10 ? "0" : "") * "$minpts.pdf", plt)
         end
-        eps = mean_knn_distances[argmax(ds)]
-
-        c = @pgf Coordinates(zip(1:n, mean_knn_distances))
-        p = @pgf Plot({ color = "red" }, c)
-        plt = @pgf Axis({ xlabel = "instance", ylabel = "$minpts-nn distance" }, p,
-                HLine({ dotted }, eps))
-        pgfsave(CONFIG["out_dir"] * "/dbscan_eps_min_pts_" * (minpts < 10 ? "0" : "") * "$minpts.pdf", plt)
-
-        clusterings = []
 
         distances = pairwise(dist, data')
         clustering = dbscan(distances, eps, minpts)
-        push!(clusterings, clustering)
+        assigns = assignments(clustering)
+        #filter!(!iszero, assigns)
+        assigns = assigns .+ 1
+        push!(silhouette_coefficients, mean(silhouettes(assigns, distances)))
 
         ## Assignment plots
-        plt = assignmentplot(assignments(clusterings[1]), data[:, 1], data[:, 2], "longitude", "latitude")
-        pgfsave(CONFIG["out_dir"] * "/dbscan_assignments_eps_" * string(floor(eps, digits=3))
+        plt = assignmentplot(assignments(clustering), x, y, "longitude", "latitude")
+        pgfsave(CONFIG[:out_dir] * "/dbscan_$(name)_assignments_eps_" * string(floor(eps, digits=3))
                 * "_min_pts_" * (minpts < 10 ? "0" : "") * "$minpts.pdf", plt)
     end
 end
 
-function main(dbpath, tablename)
-    MEAN_EARTH_RADIUS = 6371
-    earth_haversine = Haversine(MEAN_EARTH_RADIUS)
-    !isdir(CONFIG["out_dir"]) && mkdir(CONFIG["out_dir"])
+"""
+"""
+function process(dbpath, tablename)
+    CONFIG[:out_dir] = CONFIG[:out_dir] * "/" * split(dbpath, "/")[end]
+    !ispath(CONFIG[:out_dir]) && mkpath(CONFIG[:out_dir])
 
-    # Load data
-    db = SQLite.DB(dbpath)
-    table = DBInterface.execute(db, """
-        SELECT * FROM $tablename;
-    """) |> Tables.columntable
+    df, crps_titles, crps_contents, dtm_titles, dtm_contents, tfidf_titles, tfidf_contents = preparedata(dbpath, tablename)
+    display(dtm_titles)
+    display(dtm_contents)
+    display(Array(tfidf_titles))
+    display(Array(tfidf_contents))
 
-    # Pre-process data
-    # Text column title
-    # Text column content
+    #M = fit(PCA, Array(tfidf_contents)'; maxoutdim=1000)
+    #tfidf_contents = MultivariateStats.transform(M, tfidf_contents')'
+
+    if CONFIG[:do_lsa]
+        lsa(tfidf_titles)
+        lsa(tfidf_contents)
+        M = fit(UnitRangeTransform, tfidf_contents, dims=2)
+        tfidf_contents = StatsBase.transform(M, tfidf_contents)
+    end
+    if CONFIG[:do_lda]
+        lda_titles = lda(dtm_titles, 4, 1000, 0.1, 0.1)
+        lda_contents = lda(dtm_contents, 4, 1000, 0.1, 0.1)
+        for i = 1:4
+            println("TOPIC $i")
+            display(topkwords(lda_titles[1], i, crps_titles, 10))
+            display(topkwords(lda_contents[1], i, crps_contents, 10))
+        end
+    end
 
     # Cluster data
-    longitude = table[Symbol("long")]
-    latitude = table[Symbol("lat")]
-    data = [longitude latitude]
-    # display(data)
-
-    clusterkmeans(data, 2:12, earth_haversine)
-    clusterdbscan(data, earth_haversine)
+    if CONFIG[:do_cluster]
+        longitude = df[:, "long"]
+        latitude = df[:, "lat"]
+        clusterdbscan([longitude latitude], 2:24, Haversine(), false, longitude, latitude, "long_lat")
+        #clusterkmeans(tfidf_contents, 2:15, Euclidean(), longitude, latitude, "tfidf_contents_euclidean")
+        #clusterkmeans(tfidf_contents, 2:15, CosineDist(), longitude, latitude, "tfidf_contents_cosine")
+        #clusterkmedoids(tfidf_contents, 2:12, CosineDist(), longitude, latitude, "tfidf_contents_cosine")
+    end
 end
 
-initplots()
-main("~/datasets/participation/liqd_laermorte_melden.sqlite", "contribution")
+"""
+"""
+function main()
+    initplots()
+    #process("~/datasets/participation/liqd_laermorte_melden.sqlite", "contribution")
+    process("~/datasets/participation/liqd_mauerpark.sqlite", "contribution")
+    #process("~/datasets/participation/liqd_blankenburger_sueden.sqlite", "comment_a")
+    #process("~/datasets/participation/liqd_blankenburger_sueden.sqlite", "comment_b")
+    #process("~/datasets/participation/liqd_blankenburger_sueden.sqlite", "comment_c")
+end
