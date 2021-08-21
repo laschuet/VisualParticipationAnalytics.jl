@@ -1,30 +1,4 @@
 @testset "io" begin
-    @testset "slatetext" begin
-        @test slatetext("{\"document\":{\"nodes\":[]}}") == ""
-
-        str = """
-            {
-                \"document\": {
-                    \"nodes\": [{
-                        \"kind\": \"text\",
-                        \"leaves\": [{
-                            \"text\": \"Julia\"
-                        }]
-                    }, {
-                        \"kind\": \"block\",
-                        \"nodes\": [{
-                            \"kind\": \"text\",
-                            \"leaves\": [{
-                                \"text\": \"is fun\"
-                            }]
-                        }]
-                    }]
-                }
-            }
-        """
-        @test slatetext(str) == "Julia is fun"
-    end
-
     @testset "corpus" begin
         db = SQLite.DB()
         tablename = "test"

@@ -2,7 +2,6 @@ module VisualParticipationAnalytics
 
 using Clustering
 using Distances
-using JSON
 using Languages
 using SparseArrays
 using SQLite
