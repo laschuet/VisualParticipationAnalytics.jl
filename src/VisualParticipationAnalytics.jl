@@ -2,6 +2,7 @@ module VisualParticipationAnalytics
 
 using Clustering
 using Distances
+using JSON3
 using Languages
 using LinearAlgebra
 using SparseArrays
@@ -12,6 +13,7 @@ using TextAnalysis
 export clustering,
         corpus,
         preprocess,
+        save,
         similarities,
         slatetext,
         topicmodel,

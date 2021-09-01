@@ -188,10 +188,12 @@ function clusterdbscan(data, minpoints, epsilons, dist, optimize, x, y, name)
             assigns = assigns .+ 1
             #push!(silhouette_coefficients, mean(silhouettes(assigns, distances)))
 
+            save(clustering, CONFIG[:out_dir] * "/$(minpts)_$(ϵ).json")
+
             ## Assignment plots
             plt = assignmentplot(assignments(clustering), x, y, "longitude", "latitude")
             pgfsave(CONFIG[:out_dir] * "/dbscan_$(name)_assignments_min_pts_" * (minpts < 10 ? "0" : "")
-                    * "$minpts" * "_eps_" * string(floor(ϵ, digits=3)) * ".pdf" , plt)
+                    * "$(minpts)" * "_eps_" * string(floor(ϵ, digits=3)) * ".pdf" , plt)
         end
     end
 end
