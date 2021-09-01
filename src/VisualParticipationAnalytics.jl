@@ -3,6 +3,7 @@ module VisualParticipationAnalytics
 using Clustering
 using Distances
 using Languages
+using LinearAlgebra
 using SparseArrays
 using SQLite
 using Tables
