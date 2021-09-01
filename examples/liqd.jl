@@ -16,7 +16,7 @@ using TextAnalysis
 
 Random.seed!(1)
 
-CONFIG = Dict(:out_dir=>"out", :do_lsa=>false, :do_lda=>true, :do_cluster=>false)
+CONFIG = Dict(:out_dir=>"out", :do_lsa=>false, :do_lda=>false, :do_cluster=>true)
 
 """
 """
@@ -152,9 +152,9 @@ end
 
 """
 """
-function clusterdbscan(data, minpoints, dist, optimize, x, y, name)
-    eps = 0.825
-    silhouette_coefficients = []
+function clusterdbscan(data, minpoints, epsilons, dist, optimize, x, y, name)
+    eps = 0.5825
+    #silhouette_coefficients = []
     for minpts in minpoints
         if optimize
             tree = BallTree(data', dist)
@@ -181,16 +181,18 @@ function clusterdbscan(data, minpoints, dist, optimize, x, y, name)
         end
 
         distances = pairwise(dist, data')
-        clustering = dbscan(distances, eps, minpts)
-        assigns = assignments(clustering)
-        #filter!(!iszero, assigns)
-        assigns = assigns .+ 1
-        push!(silhouette_coefficients, mean(silhouettes(assigns, distances)))
+        for ϵ in epsilons
+            clustering = dbscan(distances, ϵ, minpts)
+            assigns = assignments(clustering)
+            #filter!(!iszero, assigns)
+            assigns = assigns .+ 1
+            #push!(silhouette_coefficients, mean(silhouettes(assigns, distances)))
 
-        ## Assignment plots
-        plt = assignmentplot(assignments(clustering), x, y, "longitude", "latitude")
-        pgfsave(CONFIG[:out_dir] * "/dbscan_$(name)_assignments_eps_" * string(floor(eps, digits=3))
-                * "_min_pts_" * (minpts < 10 ? "0" : "") * "$minpts.pdf", plt)
+            ## Assignment plots
+            plt = assignmentplot(assignments(clustering), x, y, "longitude", "latitude")
+            pgfsave(CONFIG[:out_dir] * "/dbscan_$(name)_assignments_min_pts_" * (minpts < 10 ? "0" : "")
+                    * "$minpts" * "_eps_" * string(floor(ϵ, digits=3)) * ".pdf" , plt)
+        end
     end
 end
 
@@ -229,7 +231,7 @@ function process(dbpath, tablename)
     if CONFIG[:do_cluster]
         longitude = df[:, "long"]
         latitude = df[:, "lat"]
-        clusterdbscan([longitude latitude], 2:24, Haversine(), false, longitude, latitude, "long_lat")
+        clusterdbscan([longitude latitude], 2:12, 5:5:200, Haversine(), false, longitude, latitude, "long_lat")
         #clusterkmeans(tfidf_contents, 2:15, Euclidean(), longitude, latitude, "tfidf_contents_euclidean")
         #clusterkmeans(tfidf_contents, 2:15, CosineDist(), longitude, latitude, "tfidf_contents_cosine")
         #clusterkmedoids(tfidf_contents, 2:12, CosineDist(), longitude, latitude, "tfidf_contents_cosine")
@@ -240,9 +242,9 @@ end
 """
 function main()
     initplots()
-    #process("~/datasets/participation/liqd_laermorte_melden.sqlite", "contribution")
-    process("~/datasets/participation/liqd_mauerpark.sqlite", "contribution")
-    #process("~/datasets/participation/liqd_blankenburger_sueden.sqlite", "comment_a")
-    #process("~/datasets/participation/liqd_blankenburger_sueden.sqlite", "comment_b")
-    #process("~/datasets/participation/liqd_blankenburger_sueden.sqlite", "comment_c")
+    #process("~/datasets/participation/databases/liqd_laermorte_melden.sqlite", "contribution")
+    process("~/datasets/participation/databases/liqd_mauerpark.sqlite", "contribution")
+    #process("~/datasets/participation/databases/liqd_blankenburger_sueden.sqlite", "comment_a")
+    #process("~/datasets/participation/databases/liqd_blankenburger_sueden.sqlite", "comment_b")
+    #process("~/datasets/participation/databases/liqd_blankenburger_sueden.sqlite", "comment_c")
 end
