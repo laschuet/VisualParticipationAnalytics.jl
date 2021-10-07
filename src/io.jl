@@ -9,6 +9,18 @@ function corpus(db::SQLite.DB, tablename::AbstractString,
 end
 
 """"""
+function save(M::AbstractMatrix, filename::AbstractString)
+    result = Dict(enumerate(eachcol(M)))
+
+    open(filename, "w") do io
+        JSON3.write(io, result)
+    end
+    open(filename * ".pretty", "w") do io
+        JSON3.pretty(io, result)
+    end
+end
+
+""""""
 function save(clustering::DbscanResult, filename::AbstractString)
     y = assignments(clustering) .+ 1
     k = nclusters(clustering) + 1 # unassigned instances / noise
