@@ -9,6 +9,15 @@ function corpus(db::SQLite.DB, tablename::AbstractString,
 end
 
 """"""
+function readdb(filename::AbstractString, tablename::AbstractString)
+    db = SQLite.DB(filename)
+    df = DBInterface.execute(db, """
+        SELECT * FROM $tablename;
+    """) |> DataFrame
+    return df
+end
+
+""""""
 function save(M::AbstractMatrix, filename::AbstractString)
     result = Dict(enumerate(eachcol(M)))
 
