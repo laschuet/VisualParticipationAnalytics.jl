@@ -1,6 +1,7 @@
 module VisualParticipationAnalytics
 
 using Clustering
+using DataFrames
 using Distances
 using JSON3
 using Languages
@@ -13,6 +14,7 @@ using TextAnalysis
 export clustering,
         corpus,
         preprocess,
+        readdb,
         save,
         similarities,
         slatetext,
