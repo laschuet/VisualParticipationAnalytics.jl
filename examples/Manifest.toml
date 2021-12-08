@@ -261,6 +261,12 @@ git-tree-sha1 = "8076680b162ada2a031f707ac7b4953e30667a37"
 uuid = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
 version = "0.21.2"
 
+[[JSON3]]
+deps = ["Dates", "Mmap", "Parsers", "StructTypes", "UUIDs"]
+git-tree-sha1 = "b3e5984da3c6c95bcf6931760387ff2e64f508f3"
+uuid = "0f8b85d8-7281-11e9-16c2-39a750bddbf1"
+version = "1.9.1"
+
 [[Languages]]
 deps = ["InteractiveUtils", "JSON"]
 git-tree-sha1 = "b1a564061268ccc3f3397ac0982983a657d4dcb8"
@@ -735,6 +741,12 @@ version = "1.0.2"
 
 [[Unicode]]
 uuid = "4ec0a83e-493e-50e2-b9ac-8f72acf5a8f5"
+
+[[VisualParticipationAnalytics]]
+deps = ["Clustering", "DataFrames", "Distances", "JSON3", "Languages", "LinearAlgebra", "SQLite", "SparseArrays", "Tables", "TextAnalysis"]
+path = "/home/lars/.julia/dev/VisualParticipationAnalytics"
+uuid = "bbd64049-1bd8-4ca4-b285-6ccec4c8be5f"
+version = "0.1.0"
 
 [[WeakRefStrings]]
 deps = ["DataAPI", "Random", "Test"]
