@@ -57,10 +57,7 @@ end
 """
 function preparedata(dbpath, tablename)
     # Load data
-    db = SQLite.DB(dbpath)
-    df = DBInterface.execute(db, """
-        SELECT * FROM $tablename;
-    """) |> DataFrame
+    df = readdb(dbpath, tablename)
     display(describe(df))
 
     # Pre-process data
@@ -188,7 +185,7 @@ function clusterdbscan(data, minpoints, epsilons, dist, optimize, x, y, name)
             assigns = assigns .+ 1
             #push!(silhouette_coefficients, mean(silhouettes(assigns, distances)))
 
-            save(clustering, CONFIG[:out_dir] * "/$(minpts)_$(ϵ).json")
+            save(clustering, CONFIG[:out_dir] * "/" * (minpts < 10 ? "0" : "") * "$(minpts)_$(ϵ).json")
 
             ## Assignment plots
             plt = assignmentplot(assignments(clustering), x, y, "longitude", "latitude")
@@ -249,4 +246,14 @@ function main()
     #process("~/datasets/participation/databases/liqd_blankenburger_sueden.sqlite", "comment_a")
     #process("~/datasets/participation/databases/liqd_blankenburger_sueden.sqlite", "comment_b")
     #process("~/datasets/participation/databases/liqd_blankenburger_sueden.sqlite", "comment_c")
+end
+
+"""
+"""
+function distances()
+    df = readdb("~/datasets/participation/databases/liqd_mauerpark.sqlite", "contribution")
+    longitude = df[:, "long"]
+    latitude = df[:, "lat"]
+    distances = pairwise(Haversine(), [longitude latitude]')
+    save(distances, CONFIG[:out_dir] * "/long_lat_haversine.json")
 end
