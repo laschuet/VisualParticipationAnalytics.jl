@@ -241,17 +241,17 @@ end
 """
 function main()
     initplots()
-    #process("~/datasets/participation/databases/liqd_laermorte_melden.sqlite", "contribution")
-    process("~/datasets/participation/databases/liqd_mauerpark.sqlite", "contribution")
-    #process("~/datasets/participation/databases/liqd_blankenburger_sueden.sqlite", "comment_a")
-    #process("~/datasets/participation/databases/liqd_blankenburger_sueden.sqlite", "comment_b")
-    #process("~/datasets/participation/databases/liqd_blankenburger_sueden.sqlite", "comment_c")
+    #process("~/Datasets/participation/databases/liqd_laermorte_melden.sqlite", "contribution")
+    process("~/Datasets/participation/databases/liqd_mauerpark.sqlite", "contribution")
+    #process("~/Datasets/participation/databases/liqd_blankenburger_sueden.sqlite", "comment_a")
+    #process("~/Datasets/participation/databases/liqd_blankenburger_sueden.sqlite", "comment_b")
+    #process("~/Datasets/participation/databases/liqd_blankenburger_sueden.sqlite", "comment_c")
 end
 
 """
 """
 function distances()
-    df = readdb("~/datasets/participation/databases/liqd_mauerpark.sqlite", "contribution")
+    df = readdb("~/Datasets/participation/databases/liqd_mauerpark.sqlite", "contribution")
     longitude = df[:, "long"]
     latitude = df[:, "lat"]
     distances = pairwise(Haversine(), [longitude latitude]')
