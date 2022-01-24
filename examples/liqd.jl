@@ -1,6 +1,7 @@
 using VisualParticipationAnalytics
 using Clustering
 using DataFrames
+using Dates
 using Distances
 using Languages
 using LinearAlgebra
@@ -251,9 +252,28 @@ end
 """
 """
 function distances()
+    !ispath(CONFIG[:out_dir]) && mkpath(CONFIG[:out_dir])
+
     df = readdb("~/Datasets/participation/databases/liqd_mauerpark.sqlite", "contribution")
     longitude = df[:, "long"]
     latitude = df[:, "lat"]
     distances = pairwise(Haversine(), [longitude latitude]')
     save(distances, CONFIG[:out_dir] * "/long_lat_haversine.json")
+
+    createdat = df[:, "created_at"]
+    createdat = map(t -> split(t, ".")[1], createdat)
+    format = DateFormat("Y-m-dTH:M:S", "english")
+    timestamps = DateTime.(createdat, format)
+    n = length(timestamps)
+    distances = zeros(Millisecond, n, n)
+    for i = 1:n
+        for j = 1:n
+            distances[i, j] = timestamps[i] - timestamps[j]
+        end
+    end
+    save(string.(canonicalize.(Dates.CompoundPeriod.(distances))), CONFIG[:out_dir] * "/timestamps_en.json")
+    save(map(t -> t.value, round.(distances, Second)), CONFIG[:out_dir] * "/timestamps_seconds.json")
+    save(map(t -> t.value, round.(distances, Minute)), CONFIG[:out_dir] * "/timestamps_minutes.json")
+    save(map(t -> t.value, round.(distances, Hour)), CONFIG[:out_dir] * "/timestamps_hours.json")
+    save(map(t -> t.value, round.(distances, Day)), CONFIG[:out_dir] * "/timestamps_days.json")
 end
