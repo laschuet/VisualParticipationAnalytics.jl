@@ -276,4 +276,14 @@ function distances()
     save(map(t -> t.value, round.(distances, Minute)), CONFIG[:out_dir] * "/timestamps_minutes.json")
     save(map(t -> t.value, round.(distances, Hour)), CONFIG[:out_dir] * "/timestamps_hours.json")
     save(map(t -> t.value, round.(distances, Day)), CONFIG[:out_dir] * "/timestamps_days.json")
+
+    authors = df[:, "author"]
+    n = length(authors)
+    distances = zeros(Int, n, n)
+    for i = 1:n
+        for j = 1:n
+            distances[i, j] = authors[i] == authors[j] ? 0 : 1
+        end
+    end
+    save(distances, CONFIG[:out_dir] * "/authors.json")
 end
