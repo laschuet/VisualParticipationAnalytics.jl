@@ -290,7 +290,7 @@ function distances()
 
     titles = df[:, "title"]
     lang = Languages.German()
-    titles = preprocess.(titles, [lang], stem=false)
+    titles = preprocess.(titles, [lang], dostem=false)
     embeddingtable = load_embeddings(FastText_Text{:de})
     wordindextable = Dict(word => index for (index, word) in enumerate(embeddingtable.vocab))
     embeddingsize = size(embeddingtable.embeddings, 1)
