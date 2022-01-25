@@ -1,5 +1,6 @@
 """"""
 function preprocess(txt::AbstractString, lang::Language; dostem=true)
+    # We replace by " " to handle cases such as "end of sentence.begin of next sentence"
     txt = replace(txt, r"[.:,;?!()\[\]\\=*/+-]" => " ")
     tokens = tokenize(lang, txt)
     # TODO Stop word removal
