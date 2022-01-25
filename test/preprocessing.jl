@@ -5,6 +5,7 @@
 
         @test preprocess(input, Languages.English()) == output
         @test preprocess(input) == output
+        @test preprocess(input, dostem=false) == "The Julia programming language is fun"
     end
 
     @testset "german" begin
@@ -13,5 +14,6 @@
 
         @test preprocess(input, Languages.German()) == output
         @test preprocess(input) == output
+        @test preprocess(input, dostem=false) == "Die Straßen sind leer die 10 Blätter sind grün und die Röte fehlt"
     end
 end

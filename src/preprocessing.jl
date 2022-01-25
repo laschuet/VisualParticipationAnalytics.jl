@@ -1,13 +1,15 @@
 """"""
-function preprocess(txt::AbstractString, lang::Language)
+function preprocess(txt::AbstractString, lang::Language; dostem=true)
     txt = replace(txt, r"[.:,;?!()\[\]=*/+-]" => " ")
     tokens = tokenize(lang, txt)
     # TODO Stop word removal
-    stemmer = Stemmer(isocode(lang))
-    tokens = stem(stemmer, tokens)
+    if dostem
+        stemmer = Stemmer(isocode(lang))
+        tokens = stem(stemmer, tokens)
+    end
     return join(tokens, " ")
 end
-preprocess(txt::AbstractString) = preprocess(txt, LanguageDetector()(txt)[1])
+preprocess(txt::AbstractString; kwargs...) = preprocess(txt, LanguageDetector()(txt)[1]; kwargs...)
 
 """"""
 function TextAnalysis.tf_idf(crps::Corpus)
