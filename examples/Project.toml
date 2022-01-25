@@ -2,6 +2,7 @@
 Clustering = "aaaa29a8-35af-508c-8bc3-b662a17a0fe5"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 Distances = "b4f34e82-e78d-54a5-968a-f98e89d6e8f7"
+Embeddings = "c5bfea45-b7f1-5224-a596-15500f5db411"
 Languages = "8ef0a80b-9436-5d2c-a485-80b904378c43"
 MLJ = "add582a8-e3ab-11e8-2d5e-e98b27df1bc7"
 MultivariateStats = "6f286f6a-111f-5878-ab1e-185364afe411"
