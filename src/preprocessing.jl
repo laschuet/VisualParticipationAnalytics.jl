@@ -1,6 +1,6 @@
 """"""
 function preprocess(txt::AbstractString, lang::Language; dostem=true)
-    txt = replace(txt, r"[.:,;?!()\[\]=*/+-]" => " ")
+    txt = replace(txt, r"[.:,;?!()\[\]\\=*/+-]" => " ")
     tokens = tokenize(lang, txt)
     # TODO Stop word removal
     if dostem
