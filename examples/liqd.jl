@@ -3,6 +3,7 @@ using Clustering
 using DataFrames
 using Dates
 using Distances
+using Embeddings
 using Languages
 using LinearAlgebra
 using MLJ
@@ -286,4 +287,33 @@ function distances()
         end
     end
     save(distances, CONFIG[:out_dir] * "/authors.json")
+
+    titles = df[:, "title"]
+    lang = Languages.German()
+    titles = preprocess.(titles, [lang], stem=false)
+    embeddingtable = load_embeddings(FastText_Text{:de})
+    wordindextable = Dict(word => index for (index, word) in enumerate(embeddingtable.vocab))
+    embeddingsize = size(embeddingtable.embeddings, 1)
+    titleembeddings = Matrix{Float64}(undef, embeddingsize, length(titles))
+    for (index, title) in enumerate(titles)
+        words = split(title, " ")
+        titleembedding = zeros(embeddingsize)
+        numunknownwords = 0
+        for word in words
+            if !haskey(wordindextable, word)
+                numunknownwords += 1
+                continue
+            end
+            wordindex = wordindextable[word]
+            embedding = embeddingtable.embeddings[:, wordindex]
+            titleembedding += embedding
+        end
+        numknownwords = length(words) - numunknownwords
+        if numknownwords > 0
+            titleembedding /= numknownwords
+        end
+        titleembeddings[:, index] = titleembedding
+    end
+    distances = pairwise(Euclidean(), titleembeddings)
+    save(distances, CONFIG[:out_dir] * "/titles_euclidean.json")
 end
