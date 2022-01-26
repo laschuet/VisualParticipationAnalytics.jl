@@ -18,6 +18,15 @@ function readdb(filename::AbstractString, tablename::AbstractString)
 end
 
 """"""
+function createrankings(M::AbstractMatrix, filename::AbstractString)
+    return map(iter -> begin
+        permindices = sortperm(iter[2])
+        sortedvalues = iter[2][permindices]
+        return (iter[1], collect(zip(permindices, sortedvalues)))
+    end, enumerate(eachcol(M)))
+end
+
+""""""
 function save(entity, filename::AbstractString)
     open(filename, "w") do io
         JSON3.write(io, entity)

@@ -13,6 +13,7 @@ using TextAnalysis
 
 export clustering,
         corpus,
+        createrankings,
         preprocess,
         readdb,
         save,
