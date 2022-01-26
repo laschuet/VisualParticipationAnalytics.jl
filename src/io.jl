@@ -18,15 +18,19 @@ function readdb(filename::AbstractString, tablename::AbstractString)
 end
 
 """"""
-function save(M::AbstractMatrix, filename::AbstractString)
-    result = Dict(enumerate(eachcol(M)))
-
+function save(entity, filename::AbstractString)
     open(filename, "w") do io
-        JSON3.write(io, result)
+        JSON3.write(io, entity)
     end
     open(filename * ".pretty", "w") do io
-        JSON3.pretty(io, result)
+        JSON3.pretty(io, entity)
     end
+end
+
+""""""
+function save(M::AbstractMatrix, filename::AbstractString)
+    result = Dict(enumerate(eachcol(M)))
+    save(result, filename)
 end
 
 """"""
@@ -55,11 +59,5 @@ function save(clustering::DbscanResult, filename::AbstractString)
     end
 
     result = Dict("clusters" => clusters, "assignments" => assigns, "invAssignments" => invassigns)
-
-    open(filename, "w") do io
-        JSON3.write(io, result)
-    end
-    open(filename * ".pretty", "w") do io
-        JSON3.pretty(io, result)
-    end
+    save(result, filename)
 end
