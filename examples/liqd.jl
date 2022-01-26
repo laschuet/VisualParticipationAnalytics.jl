@@ -260,11 +260,7 @@ function distances()
     latitude = df[:, "lat"]
     distances = pairwise(Haversine(), [longitude latitude]')
     save(distances, CONFIG[:out_dir] * "/long_lat_haversine.json")
-    sorteddistances = map(col -> begin
-        permindices = sortperm(col[2])
-        sortedvals = col[2][permindices]
-        return (col[1], collect(zip(permindices, sortedvals)))
-    end, enumerate(eachcol(distances)))
+    sorteddistances = createrankings(distances)
     save(Dict(sorteddistances), CONFIG[:out_dir] * "/long_lat_haversine_sorted.json")
 
     createdat = df[:, "created_at"]
@@ -293,6 +289,8 @@ function distances()
         end
     end
     save(distances, CONFIG[:out_dir] * "/authors.json")
+    sorteddistances = createrankings(distances)
+    save(Dict(sorteddistances), CONFIG[:out_dir] * "/authors_sorted.json")
 
     titles = df[:, "title"]
     lang = Languages.German()
@@ -322,4 +320,6 @@ function distances()
     end
     distances = pairwise(Euclidean(), titleembeddings)
     save(distances, CONFIG[:out_dir] * "/titles_euclidean.json")
+    sorteddistances = createrankings(distances)
+    save(Dict(sorteddistances), CONFIG[:out_dir] * "/titles_euclidean_sorted.json")
 end
