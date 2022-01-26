@@ -18,7 +18,7 @@ function readdb(filename::AbstractString, tablename::AbstractString)
 end
 
 """"""
-function createrankings(M::AbstractMatrix, filename::AbstractString)
+function createrankings(M::AbstractMatrix)
     return map(iter -> begin
         permindices = sortperm(iter[2])
         sortedvalues = iter[2][permindices]
