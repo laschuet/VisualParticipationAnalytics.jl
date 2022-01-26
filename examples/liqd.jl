@@ -260,6 +260,12 @@ function distances()
     latitude = df[:, "lat"]
     distances = pairwise(Haversine(), [longitude latitude]')
     save(distances, CONFIG[:out_dir] * "/long_lat_haversine.json")
+    sorteddistances = map(col -> begin
+        permindices = sortperm(col[2])
+        sortedvals = col[2][permindices]
+        return (col[1], collect(zip(permindices, sortedvals)))
+    end, enumerate(eachcol(distances)))
+    save(Dict(sorteddistances), CONFIG[:out_dir] * "/long_lat_haversine_sorted.json")
 
     createdat = df[:, "created_at"]
     createdat = map(t -> split(t, ".")[1], createdat)
